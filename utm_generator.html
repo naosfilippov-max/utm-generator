@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Генератор UTM-ссылок</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #18202a;
+      --muted: #667085;
+      --border: #d9dee7;
+      --accent: #1f6feb;
+      --accent-hover: #1858bd;
+      --danger-bg: #fff1f0;
+      --danger-text: #b42318;
+      --ok-bg: #ecfdf3;
+      --ok-text: #027a48;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 760px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 12px 36px rgba(16, 24, 40, 0.08);
+      padding: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .field { margin-bottom: 18px; }
+    .full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+      word-break: break-all;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .alert {
+      display: none;
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .alert.error {
+      display: block;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #fecdca;
+    }
+
+    .alert.success {
+      display: block;
+      background: var(--ok-bg);
+      color: var(--ok-text);
+      border: 1px solid #abefc6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .primary:hover { background: var(--accent-hover); }
+
+    .secondary {
+      background: #eef2f7;
+      color: var(--text);
+    }
+
+    .result-block {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 22px; }
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Генератор UTM-ссылок</h1>
+    <p class="subtitle">Вставьте исходную ссылку, выберите площадку и сообщество, укажите дату выхода поста. utm_medium=organic добавляется автоматически.</p>
+
+    <div id="message" class="alert" aria-live="polite"></div>
+
+    <div class="field full">
+      <label for="baseUrl">Исходная ссылка</label>
+      <input id="baseUrl" type="text" placeholder="https://example.ru/page" autocomplete="off" />
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="source">Площадка</label>
+        <select id="source">
+          <option value="vk">ВК</option>
+          <option value="telegram">Телеграм</option>
+          <option value="max">Макс</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="campaign">Сообщество</label>
+        <select id="campaign">
+          <option value="ru_bio_other_multi-product_acneproject">ЛАВ</option>
+          <option value="ru_bio_other_multi-product_lico-atopii">УАЕЛ</option>
+          <option value="ru_naos_other_naospro">NAOS Про</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field full">
+      <label for="contentDate">Дата выхода поста</label>
+      <input id="contentDate" type="text" inputmode="numeric" maxlength="6" placeholder="010526" autocomplete="off" />
+      <div class="hint">Формат DDMMYY. Например: 1 мая 2026 — 010526.</div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" type="button" id="generateBtn">Сгенерировать ссылку</button>
+      <button class="secondary" type="button" id="clearBtn">Очистить</button>
+    </div>
+
+    <section class="result-block">
+      <div class="field full">
+        <label for="resultUrl">Готовая ссылка</label>
+        <textarea id="resultUrl" readonly placeholder="Здесь появится ссылка с UTM"></textarea>
+      </div>
+      <div class="actions">
+        <button class="secondary" type="button" id="copyBtn">Скопировать ссылку</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const baseUrl = document.getElementById('baseUrl');
+    const source = document.getElementById('source');
+    const campaign = document.getElementById('campaign');
+    const contentDate = document.getElementById('contentDate');
+    const resultUrl = document.getElementById('resultUrl');
+    const message = document.getElementById('message');
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = 'alert ' + type;
+    }
+
+    function clearMessage() {
+      message.textContent = '';
+      message.className = 'alert';
+    }
+
+    function generateUrl() {
+      clearMessage();
+      resultUrl.value = '';
+
+      const url = baseUrl.value;
+      const date = contentDate.value.trim();
+
+      if (!url.trim()) {
+        showMessage('Пожалуйста, вставьте исходную ссылку.', 'error');
+        return;
+      }
+
+      if (/\s/.test(url)) {
+        showMessage('Пожалуйста, удалите пробелы из ссылки', 'error');
+        return;
+      }
+
+      if (!/^\d{6}$/.test(date)) {
+        showMessage('Пожалуйста, заполните дату выхода поста в формате DDMMYY. Например: 010526.', 'error');
+        return;
+      }
+
+      const firstSeparator = url.includes('?') ? '&' : '?';
+      const finalUrl = url
+        + firstSeparator + 'utm_source=' + encodeURIComponent(source.value)
+        + '&utm_medium=organic'
+        + '&utm_campaign=' + encodeURIComponent(campaign.value)
+        + '&utm_content=' + encodeURIComponent(date);
+
+      resultUrl.value = finalUrl;
+      showMessage('Ссылка сгенерирована.', 'success');
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', generateUrl);
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      baseUrl.value = '';
+      source.value = 'vk';
+      campaign.value = 'ru_bio_other_multi-product_acneproject';
+      contentDate.value = '';
+      resultUrl.value = '';
+      clearMessage();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      clearMessage();
+      if (!resultUrl.value) {
+        showMessage('Сначала сгенерируйте ссылку.', 'error');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(resultUrl.value);
+        showMessage('Ссылка скопирована.', 'success');
+      } catch (error) {
+        resultUrl.select();
+        document.execCommand('copy');
+        showMessage('Ссылка скопирована.', 'success');
+      }
+    });
+  </script>
+</body>
+</html>
